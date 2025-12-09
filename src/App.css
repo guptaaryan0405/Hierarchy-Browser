@@ -1,0 +1,507 @@
+/* Global Reset */
+html,
+body,
+#root {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  font-family: 'Inter', sans-serif;
+  overflow: hidden;
+  background-color: #f4f4f4;
+  /* Subtle background */
+}
+
+/* Main Grid Layout */
+.app-container {
+  display: grid;
+  grid-template-areas:
+    "header header"
+    "left main";
+  grid-template-columns: 300px 1fr;
+  /* Left fixed, Main flexible */
+  grid-template-rows: 50px 1fr;
+  /* Header fixed height, Content max */
+  width: 100vw;
+  height: 100vh;
+}
+
+/* Header / Toolbar */
+.app-header {
+  grid-area: header;
+  background-color: #ffffff;
+  border-bottom: 1px solid #e0e0e0;
+  display: flex;
+  align-items: center;
+  padding: 0 20px;
+  justify-content: space-between;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  z-index: 20;
+}
+
+.title-section h1 {
+  font-size: 1.2rem;
+  font-weight: 600;
+  margin: 0;
+  color: #333;
+}
+
+.toolbar-controls {
+  display: flex;
+  gap: 15px;
+  align-items: center;
+}
+
+.toolbar-btn {
+  background: none;
+  border: 1px solid transparent;
+  padding: 6px 10px;
+  border-radius: 4px;
+  cursor: pointer;
+  color: #555;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.9rem;
+  transition: all 0.2s;
+}
+
+.toolbar-btn:hover {
+  background-color: #f0f0f0;
+  color: #000;
+}
+
+.toolbar-btn.active {
+  background-color: #e6f7ff;
+  color: #1890ff;
+  border-color: #bae7ff;
+}
+
+/* Left Sidebar */
+.sidebar-left {
+  grid-area: left;
+  background-color: #ffffff;
+  border-right: 1px solid #e0e0e0;
+  padding: 20px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  box-shadow: 2px 0 5px rgba(0, 0, 0, 0.02);
+  z-index: 10;
+}
+
+/* Right Floating Panels */
+.floating-hierarchy {
+  position: absolute;
+  top: 70px;
+  /* Below header */
+  right: 20px;
+  width: 320px;
+  max-height: 40vh;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  border: 1px solid #ddd;
+  padding: 15px;
+  overflow-y: auto;
+  z-index: 90;
+}
+
+.floating-info-panel {
+  position: absolute;
+  top: 400px;
+  /* Closer to hierarchy (which is at top: 70px) */
+  right: 20px;
+  width: 380px;
+  max-height: 50vh;
+  /* Allow it to fit on screen */
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  border: 1px solid #ddd;
+  padding: 15px;
+  overflow-y: auto;
+  z-index: 95;
+  font-family: 'Inter', sans-serif;
+}
+
+/* Close button for custom floating panels */
+.close-btn {
+  position: absolute;
+  top: 10px;
+  right: 15px;
+  background: none;
+  border: none;
+  font-size: 1.2rem;
+  cursor: pointer;
+  color: #888;
+}
+
+.close-btn:hover {
+  color: #333;
+}
+
+/* Info Panel Styling Updates */
+.info-panel {
+  /* Reset internal padding/bg since container handles it now */
+  padding: 0;
+  background: transparent;
+}
+
+/* Stat sections font update */
+.stat-section ul {
+  font-family: 'Inter', monospace;
+  /* Consistent monospace mix */
+}
+
+/* Floating View Mode Selector - Ensure consistent font */
+.floating-view-mode {
+  font-family: 'Inter', sans-serif;
+}
+
+/* Hover Name Strip - Ensure consistent font */
+.hover-strip {
+  position: absolute;
+  bottom: 20px;
+  left: 20px;
+  background: white;
+  padding: 8px 15px;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  border: 1px solid #eee;
+  font-family: 'Inter', monospace;
+  font-size: 0.9rem;
+  color: #555;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* Main Content Area */
+.main-content {
+  grid-area: main;
+  position: relative;
+  background-color: #ffffff;
+  overflow: hidden;
+}
+
+/* Hamburger Menu */
+.hamburger-menu {
+  cursor: pointer;
+  font-size: 1.5rem;
+  color: #555;
+  padding: 5px;
+}
+
+/* Section styling in Left Sidebar */
+.panel-section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.panel-section h3 {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #333;
+  margin: 0 0 5px 0;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Input Fields & Controls - Force Light Mode */
+label {
+  font-size: 0.85rem;
+  color: #666;
+  font-weight: 500;
+  margin-bottom: 4px;
+}
+
+input[type="text"],
+input[type="number"],
+select {
+  padding: 8px;
+  border: 1px solid #d9d9d9;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  width: 100%;
+  box-sizing: border-box;
+  transition: border-color 0.2s;
+  background-color: #ffffff !important;
+  /* Force Light Background */
+  color: #333333 !important;
+  /* Force Dark Text */
+  -webkit-appearance: none;
+  /* Remove native styling issues on some browsers */
+}
+
+input:focus {
+  border-color: #40a9ff;
+  outline: none;
+}
+
+/* Range Input styling fix */
+input[type="range"] {
+  background: transparent !important;
+  /* Let specific gradient show through if needed, though this is usually track */
+  -webkit-appearance: auto;
+}
+
+/* Visual Editing Tools */
+.gradient-control {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 5px;
+}
+
+.gradient-bar {
+  flex: 1;
+  height: 8px;
+  border-radius: 4px;
+  /* Background set inline based on logic */
+}
+
+.range-inputs {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.range-inputs input {
+  width: 80px;
+  text-align: center;
+}
+
+/* Floating View Mode Selector */
+.floating-view-mode {
+  position: absolute;
+  bottom: 20px;
+  right: 20px;
+  background: white;
+  padding: 5px;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  display: flex;
+  gap: 5px;
+  border: 1px solid #eee;
+  z-index: 100;
+}
+
+.mode-btn {
+  padding: 8px 16px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: #555;
+  transition: all 0.2s;
+}
+
+.mode-btn:hover {
+  background-color: #f5f5f5;
+}
+
+.mode-btn.active {
+  background-color: #e6f7ff;
+  color: #1890ff;
+  font-weight: 600;
+}
+
+/* Button Styles */
+.btn-primary {
+  width: 100%;
+  padding: 8px 12px;
+  background-color: #28a745;
+  /* Flat Green */
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  margin-top: 10px;
+  transition: background-color 0.2s;
+}
+
+.btn-primary:hover {
+  background-color: #218838;
+}
+
+.btn-secondary {
+  padding: 6px 12px;
+  background-color: #f0f0f0;
+  color: #333;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.btn-secondary:hover {
+  background-color: #e0e0e0;
+}
+
+.small-upload-btn {
+  white-space: nowrap;
+}
+
+/* Toolbar Buttons - Flat Design */
+.toolbar-btn {
+  background: none;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  cursor: pointer;
+  padding: 4px 8px;
+  font-size: 1.1rem;
+  color: #444;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.2s, color 0.2s;
+
+  /* Force flat monochrome for emoji-like chars */
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+/* Hack to flatten colored emojis on Mac */
+.toolbar-btn {
+  color: #444;
+  /* This text-shadow hack works well to silhouette emojis */
+  text-shadow: 0 0 0 #444;
+  color: transparent;
+}
+
+.toolbar-btn.active {
+  background-color: #e6f7ff;
+  border-color: #1890ff;
+  /* Active state color */
+  text-shadow: 0 0 0 #1890ff;
+}
+
+/* Info Panel */
+.info-panel {
+  padding: 10px;
+  background: #fdfdfd;
+  border-radius: 4px;
+}
+
+.info-panel h3 {
+  margin-top: 0;
+  border-bottom: 2px solid #ddd;
+  padding-bottom: 5px;
+  margin-bottom: 10px;
+  font-size: 1.1rem;
+}
+
+.stat-row {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 5px;
+  border-bottom: 1px dotted #ccc;
+  padding-bottom: 2px;
+}
+
+.bad-value {
+  color: red;
+  font-weight: bold;
+}
+
+.good-value {
+  color: green;
+}
+
+.stat-section {
+  margin-top: 15px;
+}
+
+.stat-section h4 {
+  margin: 0 0 5px 0;
+  font-size: 0.9rem;
+  color: #444;
+  text-transform: uppercase;
+  font-weight: 600;
+}
+
+.stat-section ol {
+  margin: 0;
+  padding-left: 20px;
+}
+
+.stat-section li {
+  margin-bottom: 8px;
+}
+
+/* Bottom Status Strip */
+.bottom-status-strip {
+  position: fixed;
+  bottom: 0;
+  left: 250px;
+  /* Width of left sidebar */
+  width: calc(100% - 500px);
+  /* Subtract Left and Right sidebar widths approx */
+  background: rgba(240, 240, 240, 0.95);
+  border-top: 1px solid #ccc;
+  padding: 8px 15px;
+  font-family: monospace;
+  font-size: 0.9rem;
+  color: #333;
+  z-index: 100;
+  box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+}
+
+.toolbar-btn:hover {
+  background-color: #f5f5f5;
+}
+
+/* Placeholder */
+.placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: #aaa;
+  font-size: 1.1rem;
+}
+
+/* Loading */
+.loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: #666;
+  font-weight: 500;
+}
+
+/* File Upload */
+.upload-box {
+  border: 2px dashed #d9d9d9;
+  padding: 20px;
+  text-align: center;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: border-color 0.2s;
+}
+
+.upload-box:hover {
+  border-color: #40a9ff;
+}
+
+.file-name {
+  color: #28a745;
+  font-size: 0.85rem;
+  margin-top: 5px;
+  text-align: center;
+}

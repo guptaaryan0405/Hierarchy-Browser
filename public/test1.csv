@@ -1,0 +1,5 @@
+hier,connnecting_hier,direction,connections,wns,tns
+u_fm/u_frontend/u_ct,u_main/u_mm/u_mm_regs,to,2,0.085,0
+u_fm/u_frontend/u_ct,is_ct_resolve_vx0_rid,from,2,0,0
+u_fm/u_frontend/u_ct,is_ct_resolve_vx0_rid,to,10,0,0
+u_fm/u_frontend/u_ct,is_ct_resolve_vx0_uid,from,9,0,0

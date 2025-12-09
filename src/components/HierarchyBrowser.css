@@ -1,0 +1,109 @@
+.hierarchy-browser {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    border-top: 1px solid #e9ecef;
+    margin-top: 10px;
+    padding-top: 10px;
+    overflow: hidden;
+}
+
+.hierarchy-browser h3 {
+    font-size: 1rem;
+    margin: 0 0 10px 0;
+    color: #343a40;
+}
+
+.tree-container {
+    flex: 1;
+    overflow-y: auto;
+    padding-left: 5px;
+}
+
+.tree-node {
+    user-select: none;
+    position: relative;
+}
+
+/* Vertical line for children */
+.node-children {
+    margin-left: 8px;
+    border-left: 1px solid #dee2e6;
+}
+
+.node-content {
+    display: flex;
+    align-items: center;
+    padding: 4px 0;
+    cursor: pointer;
+    border-radius: 4px;
+    position: relative;
+}
+
+.node-content:hover {
+    background-color: #e9ecef;
+}
+
+/* Horizontal line connector */
+.node-children .tree-node::before {
+    content: "";
+    position: absolute;
+    top: 14px;
+    /* Half of line-height approx */
+    left: -8px;
+    /* Match border-left of node-children */
+    width: 8px;
+    height: 1px;
+    background-color: #dee2e6;
+}
+
+.toggle-icon {
+    width: 20px;
+    text-align: center;
+    font-size: 0.7rem;
+    color: #6c757d;
+    cursor: pointer;
+    z-index: 2;
+    /* Above lines */
+}
+
+.node-title {
+    font-size: 0.85rem;
+    color: #495057;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin-left: 4px;
+}
+
+.context-menu-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 999;
+}
+
+.context-menu {
+    position: fixed;
+    background: white;
+    border: 1px solid #ccc;
+    box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);
+    border-radius: 4px;
+    z-index: 1000;
+    padding: 4px 0;
+    min-width: 120px;
+}
+
+.context-menu div {
+    padding: 6px 12px;
+    font-size: 0.85rem;
+    cursor: pointer;
+    color: #333;
+}
+
+.context-menu div:hover {
+    background-color: #f8f9fa;
+    color: #007bff;
+}
