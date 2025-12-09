@@ -91,38 +91,61 @@ body,
   z-index: 10;
 }
 
-/* Right Floating Panels */
-.floating-hierarchy {
+/* Right Floating Stack Container */
+.floating-right-stack {
   position: absolute;
   top: 70px;
-  /* Below header */
   right: 20px;
-  width: 320px;
-  max-height: 40vh;
-  background: white;
-  border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  border: 1px solid #ddd;
-  padding: 15px;
-  overflow-y: auto;
+  bottom: 80px;
+  /* Leave space for View Mode selector at bottom */
+  width: 380px;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  /* Space between panels */
+  pointer-events: none;
+  /* Allow clicks to pass through empty space to canvas */
   z-index: 90;
 }
 
-.floating-info-panel {
-  position: absolute;
-  top: 400px;
-  /* Closer to hierarchy (which is at top: 70px) */
-  right: 20px;
-  width: 380px;
-  max-height: 50vh;
-  /* Allow it to fit on screen */
+.floating-hierarchy {
+  pointer-events: auto;
+  position: relative;
+  /* Reset absolute */
+  top: auto;
+  right: auto;
+  width: 100%;
+  max-height: 45%;
+  /* Cap height */
   background: white;
   border-radius: 8px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   border: 1px solid #ddd;
   padding: 15px;
   overflow-y: auto;
-  z-index: 95;
+  box-sizing: border-box;
+  flex-shrink: 0;
+  /* Prevention against squashing if not needed */
+}
+
+.floating-info-panel {
+  pointer-events: auto;
+  position: relative;
+  /* Reset absolute */
+  top: auto;
+  right: auto;
+  width: 100%;
+  flex: 1;
+  /* Allow to take remaining space */
+  min-height: 0;
+  /* Important for flex scroll */
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  border: 1px solid #ddd;
+  padding: 15px;
+  overflow-y: auto;
+  box-sizing: border-box;
   font-family: 'Inter', sans-serif;
 }
 

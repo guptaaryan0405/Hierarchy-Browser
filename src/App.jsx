@@ -341,29 +341,32 @@ function App() {
                 onHover={setHoveredNode}
               />
 
-              {/* Floating Hierarchy Browser */}
-              {isRightPanelOpen && elements.length > 0 && (
-                <div className="floating-hierarchy">
-                  <div style={{ marginBottom: '15px' }}>
-                    <AdvancedSearch elements={elements} onZoomTo={handleZoomTo} />
+              {/* Floating Right Stack (Hierarchy + Info) */}
+              <div className="floating-right-stack">
+                {/* Hierarchy Browser */}
+                {isRightPanelOpen && elements.length > 0 && (
+                  <div className="floating-hierarchy">
+                    <div style={{ marginBottom: '15px' }}>
+                      <AdvancedSearch elements={elements} onZoomTo={handleZoomTo} />
+                    </div>
+                    {hierarchyData.length > 0 && (
+                      <HierarchyBrowser
+                        data={hierarchyData}
+                        onZoomTo={handleZoomTo}
+                        onIsolate={handleViewOnly}
+                      />
+                    )}
                   </div>
-                  {hierarchyData.length > 0 && (
-                    <HierarchyBrowser
-                      data={hierarchyData}
-                      onZoomTo={handleZoomTo}
-                      onIsolate={handleViewOnly}
-                    />
-                  )}
-                </div>
-              )}
+                )}
 
-              {/* Floating Info Panel */}
-              {selectedElement && (
-                <div className="floating-info-panel">
-                  <button className="close-btn" onClick={() => setSelectedElement(null)}>×</button>
-                  <InfoPanel selectedData={selectedElement} rawData={rawGraphData} />
-                </div>
-              )}
+                {/* Info Panel */}
+                {selectedElement && (
+                  <div className="floating-info-panel">
+                    <button className="close-btn" onClick={() => setSelectedElement(null)}>×</button>
+                    <InfoPanel selectedData={selectedElement} rawData={rawGraphData} />
+                  </div>
+                )}
+              </div>
 
               {/* Floating View Mode Selector */}
               <div className="floating-view-mode">

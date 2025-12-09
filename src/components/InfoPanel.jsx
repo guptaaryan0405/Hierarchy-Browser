@@ -12,23 +12,24 @@ const InfoPanel = ({ selectedData, rawData }) => {
     if (type === 'edge') {
         return (
             <div className="info-panel">
-                <h3>Selected Path</h3>
-                <div style={{ wordBreak: 'break-all', fontSize: '0.9rem', marginBottom: '10px' }}>
-                    <strong>Source:</strong> {data.source} <br />
-                    <strong>Target:</strong> {data.target}
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '10px', color: '#555', fontSize: '1.1rem' }}>
+                    <strong>Info Browser</strong>
                 </div>
 
-                <div className="stat-row">
-                    <span>WNS:</span>
-                    <span className={data.wns < 0 ? 'bad-value' : 'good-value'}>{data.wns} ns</span>
+                <div style={{ marginBottom: '15px', wordBreak: 'break-all', fontFamily: 'monospace', fontSize: '0.9rem', color: '#333' }}>
+                    <span style={{ fontWeight: 'bold' }}>Path:</span> {data.source} → {data.target}
                 </div>
-                <div className="stat-row">
-                    <span>TNS:</span>
-                    <span className={data.tns < 0 ? 'bad-value' : 'good-value'}>{data.tns} ns</span>
-                </div>
-                <div className="stat-row">
-                    <span>Connections:</span>
-                    <span>{data.connections}</span>
+
+                <div className="stat-section" style={{ fontSize: '0.9rem', fontFamily: 'monospace' }}>
+                    <div style={{ marginBottom: '8px', color: '#333' }}>
+                        <strong>TNS:</strong> <span className={data.tns < 0 ? 'bad-value' : 'good-value'}>{data.tns} ns</span>
+                    </div>
+                    <div style={{ marginBottom: '8px', color: '#333' }}>
+                        <strong>WNS:</strong> <span className={data.wns < 0 ? 'bad-value' : 'good-value'}>{data.wns} ns</span>
+                    </div>
+                    <div style={{ marginBottom: '8px', color: '#333' }}>
+                        <strong>CONN:</strong> {data.connections}
+                    </div>
                 </div>
             </div>
         );
