@@ -11,37 +11,43 @@ cytoscape.use(cxtmenu);
 const GraphViewer = ({
     elements, threshold, viewMode, maxConnections, zoomToId, isolateId,
     curveStyle, endpointStyle, onIsolate, onCyReady, onSelect, onHover,
-    fontSize, gradientMin, gradientMax, thicknessMin, thicknessMax
+    nodeFontSize, edgeFontSize, gradientMin, gradientMax,
+    widthDataMin, widthDataMax, thicknessMin, thicknessMax
 }) => {
     const cyRef = useRef(null);
     const [layoutRunning, setLayoutRunning] = useState(false);
 
     const layoutOptions = {
         name: 'fcose',
-        quality: 'default',
-        randomize: true, // Randomize to find global optimum
+        quality: 'proof', // 'default' or 'proof' (slower but better quality)
+        randomize: false, // Deterministic layout
         animate: true,
-        animationDuration: 800,
+        animationDuration: 1000,
         fit: true,
         padding: 60,
         nodeDimensionsIncludeLabels: true,
         uniformNodeDimensions: false,
-        packComponents: false,
+        packComponents: true, // Pack disconnected components tightly
+        tile: true,           // Enable tiling to better organize disconnected nodes
         step: 'all',
 
         // Nesting options
         nestedNodeDimensions: true,
 
-        // Gravity
-        gravity: 0.1,
+        // Gravity - Strong but balanced by separation
+        gravity: 0.5,
         gravityRange: 3.8,
-        gravityCompound: 1.5,
-        gravityRangeCompound: 1.5,
-        numIter: 2500,
+        gravityCompound: 5.0,     // Strong pull to center
+        gravityRangeCompound: 2.0,
+        numIter: 6000,            // MAX iterations to resolve constraints
 
-        // Repulsion & Padding
-        nodeRepulsion: 5000,
-        idealEdgeLength: 50,
+        // Repulsion & Padding - 'Solid Walls' Algorithm
+        nodeRepulsion: 2500000,   // Extreme repulsion to enforce "No Overlap" rule
+        idealEdgeLength: 30,      // Slightly relaxed to allow arrangement
+        edgeElasticity: 0.1,      // Weaker springs so they don't pull through walls
+        nestingFactor: 0.1,
+
+        // Tiling
         tilingPaddingVertical: 5,
         tilingPaddingHorizontal: 5,
 
@@ -56,10 +62,13 @@ const GraphViewer = ({
             // Update styles including new visual params
             cyRef.current.style(generateDynamicStyles(
                 threshold, viewMode, maxConnections, curveStyle, endpointStyle,
-                fontSize, gradientMin, gradientMax, thicknessMin, thicknessMax
+                nodeFontSize, edgeFontSize, gradientMin, gradientMax,
+                widthDataMin, widthDataMax, thicknessMin, thicknessMax
             ));
         }
-    }, [threshold, viewMode, maxConnections, curveStyle, endpointStyle, fontSize, gradientMin, gradientMax, thicknessMin, thicknessMax]);
+    }, [threshold, viewMode, maxConnections, curveStyle, endpointStyle,
+        nodeFontSize, edgeFontSize, gradientMin, gradientMax,
+        widthDataMin, widthDataMax, thicknessMin, thicknessMax]);
 
     // Handle Zoom To
     useEffect(() => {
@@ -145,16 +154,30 @@ const GraphViewer = ({
         cy.cxtmenu({
             selector: 'node',
             commands: [
-                { content: 'Zoom To', select: (ele) => { cy.animate({ fit: { eles: ele, padding: 50 }, duration: 500 }); } },
-                { content: 'Isolate', select: (ele) => { onIsolateRef.current && onIsolateRef.current(ele.id()); } },
-                { content: 'Fit All', select: () => { cy.fit(50); } }
+                {
+                    content: 'Info',
+                    select: (ele) => {
+                        if (onSelectRef.current) onSelectRef.current({ type: 'node', data: ele.data() });
+                    }
+                },
+                {
+                    content: 'Isolate',
+                    select: (ele) => {
+                        if (onIsolateRef.current) onIsolateRef.current(ele.id());
+                    }
+                },
+                {
+                    content: 'Reset View',
+                    select: () => {
+                        if (onIsolateRef.current) onIsolateRef.current(null);
+                    }
+                }
             ]
         });
 
         // Click Logic (Tap) for Selection
         cy.on('tap', 'node', (evt) => {
             const node = evt.target;
-            console.log('Node Tapped:', node.id()); // Debug Log
 
             // Visual Highlight
             cy.elements().removeClass('selected');
@@ -185,7 +208,6 @@ const GraphViewer = ({
         // Hover Logic for Name Strip
         cy.on('mouseover', 'node', (evt) => {
             const node = evt.target;
-            console.log('Mouseover:', node.id()); // Debug Log
             if (onHoverRef.current) onHoverRef.current({ id: node.id(), label: node.data('label') });
         });
 
@@ -208,7 +230,8 @@ const GraphViewer = ({
                 style={{ width: '100%', height: '100%' }}
                 stylesheet={generateDynamicStyles(
                     threshold, viewMode, maxConnections, curveStyle, endpointStyle,
-                    fontSize, gradientMin, gradientMax, thicknessMin, thicknessMax
+                    nodeFontSize, edgeFontSize, gradientMin, gradientMax,
+                    widthDataMin, widthDataMax, thicknessMin, thicknessMax
                 )}
                 cy={handleCy}
                 wheelSensitivity={0.3}

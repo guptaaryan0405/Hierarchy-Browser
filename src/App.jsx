@@ -14,12 +14,17 @@ function App() {
 
   // View State
   const [viewMode, setViewMode] = useState('wns'); // 'wns', 'tns', 'connections'
-  const [threshold, setThreshold] = useState(-5.0); // WNS/TNS Threshold
 
   // Visual Editing State
-  const [fontSize, setFontSize] = useState(12);
-  const [gradientMin, setGradientMin] = useState(-10); // Red Max (Most negative)
-  const [gradientMax, setGradientMax] = useState(0);   // Red Start (Least negative)
+  const [nodeFontSize, setNodeFontSize] = useState(12);
+  const [edgeFontSize, setEdgeFontSize] = useState(10);
+
+  const [gradientMin, setGradientMin] = useState(-10); // Worst Value (Mapped to Red/Thick)
+  const [gradientMax, setGradientMax] = useState(0);   // Best Value (Mapped to Light/Thin)
+
+  const [widthDataMin, setWidthDataMin] = useState(-10); // Worst Value (Width)
+  const [widthDataMax, setWidthDataMax] = useState(0);   // Best Value (Width)
+
   const [thicknessMin, setThicknessMin] = useState(1);
   const [thicknessMax, setThicknessMax] = useState(5);
 
@@ -34,14 +39,14 @@ function App() {
 
   // Data Filtering State
   const [rawGraphData, setRawGraphData] = useState([]);
-  const [dataStats, setDataStats] = useState({ maxConn: 0, minWNS: 0, minTNS: 0 });
+  const [dataStats, setDataStats] = useState({ maxConn: 0, minWNS: 0, minTNS: 0 }); // Global Stats
+  const [filteredStats, setFilteredStats] = useState({ maxConn: 0, minWNS: 0, minTNS: 0 }); // Current Render Stats
   const [filters, setFilters] = useState({ conn: '0', wns: '0', tns: '0' });
   const [showInternalPaths, setShowInternalPaths] = useState(true);
 
   // Interaction State
   const [zoomToId, setZoomToId] = useState(null);
   const [isolateId, setIsolateId] = useState(null);
-  const [zoomLevel, setZoomLevel] = useState(1);
   const [isPanMode, setIsPanMode] = useState(true); // true = pan, false = select
   const [selectedElement, setSelectedElement] = useState(null); // { type: 'node'|'edge', data: {} }
   const [hoveredNode, setHoveredNode] = useState(null);
@@ -49,8 +54,40 @@ function App() {
   // Cy Reference
   const cyRef = useRef(null);
 
-  // --- Handlers ---
+  // --- Auto-Set Visual Limits Effect ---
+  useEffect(() => {
+    // Logic: 
+    // Worst Value = GradientMin (Reddest) & WidthMin (Thickest)
+    // Best Value = GradientMax (Lightest) & WidthMax (Thinnest)
 
+    // We use filteredStats to ensure the legend matches the visible graph
+    if (viewMode === 'wns') {
+      // WNS: Worst is most negative. Best is 0.
+      const val = filteredStats.minWNS;
+      setGradientMin(val);
+      setGradientMax(0);
+      setWidthDataMin(val);
+      setWidthDataMax(0);
+
+    } else if (viewMode === 'tns') {
+      // TNS: Worst is most negative. Best is 0.
+      const val = filteredStats.minTNS;
+      setGradientMin(val);
+      setGradientMax(0);
+      setWidthDataMin(val);
+      setWidthDataMax(0);
+
+    } else if (viewMode === 'connections') {
+      // Connections: Worst is Highest (Max Conn in current view). Best is 0.
+      setGradientMin(filteredStats.maxConn);
+      setGradientMax(0);
+      setWidthDataMin(filteredStats.maxConn); // Map Max Conn to Max Width
+      setWidthDataMax(0);
+    }
+
+  }, [viewMode, filteredStats]); // Run when mode or filtered stats change
+
+  // --- Handlers ---
   const handleFileUpload = async (event) => {
     const file = event.target.files[0];
     if (!file) return;
@@ -62,7 +99,7 @@ function App() {
 
     try {
       const rawData = await parseCSV(file);
-      // Stats Calc
+      // Stats Calc (Global)
       let maxConn = 0, minWNS = 0, minTNS = 0;
       rawData.forEach(row => {
         if (row.connections > maxConn) maxConn = row.connections;
@@ -74,9 +111,6 @@ function App() {
       setDataStats({ maxConn, minWNS, minTNS });
       setFilters({ conn: '0', wns: '0', tns: '0' });
       setShowInternalPaths(true);
-
-      // Auto-set visual defaults based on data
-      setGradientMin(Math.floor(minWNS));
 
       setLoading(false);
     } catch (error) {
@@ -107,6 +141,29 @@ function App() {
       }
       return passConn && passWNS && passTNS && passInternal;
     });
+
+    // --- Calculate Stats for Filtered Data ---
+    let fMaxConn = 0;
+    let fMinWNS = 0;
+    let fMinTNS = 0;
+
+    if (filteredData.length > 0) {
+      // Initialize mins to Infinity to correctly find the minimum negative value
+      fMinWNS = Infinity;
+      fMinTNS = Infinity;
+
+      filteredData.forEach(row => {
+        if (row.connections > fMaxConn) fMaxConn = row.connections;
+        if (row.wns < fMinWNS) fMinWNS = row.wns;
+        if (row.tns < fMinTNS) fMinTNS = row.tns;
+      });
+
+      // Correct Infinity if no data found (or if all values are positive/zero)
+      if (fMinWNS === Infinity) fMinWNS = 0;
+      if (fMinTNS === Infinity) fMinTNS = 0;
+    }
+
+    setFilteredStats({ maxConn: fMaxConn, minWNS: fMinWNS, minTNS: fMinTNS });
 
     const graphElements = processGraphData(filteredData);
     setElements(graphElements);
@@ -182,21 +239,9 @@ function App() {
               ✋ Pan
             </button>
 
-            <button className="toolbar-btn" onClick={handleFit} style={{ fontWeight: 'bold' }}>
-              [ Fit ]
+            <button className="toolbar-btn" onClick={handleFit} style={{ fontWeight: 'bold', border: '1px solid #e0e0e0', borderRadius: '4px' }}>
+              Fit
             </button>
-
-            <div style={{ display: 'flex', alignItems: 'center', gap: '5px', marginLeft: '10px' }}>
-              <span>A</span>
-              <input
-                type="range"
-                min="8" max="24"
-                value={fontSize}
-                onChange={(e) => setFontSize(Number(e.target.value))}
-                style={{ width: '80px' }}
-              />
-              <span style={{ fontSize: '1.2rem' }}>A</span>
-            </div>
           </div>
 
           {/* Hamburger for Right Panel */}
@@ -253,61 +298,92 @@ function App() {
             <div className="panel-section" style={{ borderTop: '1px solid #eee', paddingTop: '15px' }}>
               <h3>🎨 Visual Editing</h3>
 
+              {/* Font Sliders */}
+              <div style={{ marginBottom: '15px' }}>
+                <label style={{ display: 'flex', justifyContent: 'space-between' }}>
+                  Module Name Size: <span>{nodeFontSize}px</span>
+                </label>
+                <input
+                  type="range" min="8" max="24"
+                  value={nodeFontSize}
+                  onChange={(e) => setNodeFontSize(Number(e.target.value))}
+                  style={{ width: '100%' }}
+                />
+              </div>
+
+              <div style={{ marginBottom: '15px' }}>
+                <label style={{ display: 'flex', justifyContent: 'space-between' }}>
+                  Arrow Value Size: <span>{edgeFontSize}px</span>
+                </label>
+                <input
+                  type="range" min="6" max="18"
+                  value={edgeFontSize}
+                  onChange={(e) => setEdgeFontSize(Number(e.target.value))}
+                  style={{ width: '100%' }}
+                />
+              </div>
+
               {/* Gradient Mapping */}
               <label>Gradient Mapping (Red Intensity)</label>
               <div className="gradient-control">
                 <div className="range-inputs">
                   <input
                     type="number"
+                    step="0.001"
                     value={gradientMin}
                     onChange={(e) => setGradientMin(Number(e.target.value))}
-                    title="Value for MAX Red"
+                    title="Value for MAX Red (Worst)"
                   />
                 </div>
-                <div className="gradient-bar" style={{ background: 'linear-gradient(to right, #ff0000, #ffcccc)' }}></div>
+                {/* Visual Representation of Gradient */}
+                <div className="gradient-bar" style={{ background: 'linear-gradient(to right, #ff0000, #ffcccc)', height: '10px', borderRadius: '4px', flexGrow: 1, margin: '0 8px' }}></div>
                 <div className="range-inputs">
                   <input
                     type="number"
+                    step="0.001"
                     value={gradientMax}
                     onChange={(e) => setGradientMax(Number(e.target.value))}
-                    title="Value for MIN Red"
+                    title="Value for MIN Red (Best)"
                   />
                 </div>
               </div>
-              <p className="help-text">Map WNS/TNS values to color intensity.</p>
+              {/* <p className="help-text">Auto-set to Data Range. Worst Value = Max Red.</p> */}
 
               {/* Thickness Mapping */}
-              <label style={{ marginTop: '10px' }}>Width Mapping</label>
-              <div className="range-inputs">
-                <input
-                  type="number"
-                  value={thicknessMin}
-                  onChange={(e) => setThicknessMin(Number(e.target.value))}
-                  title="Min Width"
-                />
-                <span> to </span>
-                <input
-                  type="number"
-                  value={thicknessMax}
-                  onChange={(e) => setThicknessMax(Number(e.target.value))}
-                  title="Max Width"
-                />
-              </div>
-            </div>
-          )}
+              <label style={{ marginTop: '5px' }}>Width Mapping (Thickness)</label>
+              <div className="gradient-control" style={{ alignItems: 'center' }}>
+                <div className="range-inputs">
+                  <input
+                    type="number"
+                    step="0.001"
+                    value={widthDataMin}
+                    onChange={(e) => setWidthDataMin(Number(e.target.value))}
+                    title="Data Value for MAX Width (e.g. Worst Slack)"
+                  />
+                </div>
 
-          {/* Threshold - Only when graph rendered */}
-          {elements.length > 0 && (
-            <div className="panel-section" style={{ borderTop: '1px solid #eee', paddingTop: '15px' }}>
-              <h3>Threshold Filter</h3>
-              <label>Red Limit Threshold</label>
-              <input
-                type="number"
-                value={threshold}
-                onChange={(e) => setThreshold(Number(e.target.value))}
-                step="0.1"
-              />
-              <p className="help-text">Absolute cutoff for rendering red edges.</p>
+                {/* Wedge Icon: Thick Left -> Thin Right */}
+                <div style={{
+                  width: '0',
+                  height: '0',
+                  borderTop: '5px solid transparent',
+                  borderBottom: '5px solid transparent',
+                  borderLeft: '60px solid #333', // Points Right
+                  margin: '0 10px'
+                }} title="Thickness Scale"></div>
+
+                <div className="range-inputs">
+                  <input
+                    type="number"
+                    step="0.001"
+                    value={widthDataMax}
+                    onChange={(e) => setWidthDataMax(Number(e.target.value))}
+                    title="Data Value for MIN Width (e.g. Best Slack)"
+                  />
+                </div>
+              </div>
+              <p className="help-text" style={{ fontStyle: 'italic', fontSize: '0.75rem' }}>Maps Data Range to 5px - 1px width.</p>
+
             </div>
           )}
         </aside>
@@ -321,13 +397,17 @@ function App() {
               <GraphViewer
                 elements={elements}
                 // Visual Props
-                threshold={threshold}
                 viewMode={viewMode}
-                fontSize={fontSize}
+                nodeFontSize={nodeFontSize}
+                edgeFontSize={edgeFontSize}
+
                 gradientMin={gradientMin}
                 gradientMax={gradientMax}
+                widthDataMin={widthDataMin}
+                widthDataMax={widthDataMax}
                 thicknessMin={thicknessMin}
                 thicknessMax={thicknessMax}
+
                 curveStyle={curveStyle}
                 endpointStyle={endpointStyle}
                 // Interaction
@@ -389,11 +469,6 @@ function App() {
             </div>
           )}
         </main>
-
-        {/* Removed grid sidebar-right */}
-
-
-
       </div>
     </ErrorBoundary>
   );

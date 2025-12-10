@@ -69,7 +69,9 @@ export const getGraphStyles = (threshold = -5.0) => [
 
 export const generateDynamicStyles = (
     threshold, viewMode = 'wns', maxConnections = 10, curveStyle = 'straight', endpointStyle = 'inside-to-node',
-    fontSize = 12, gradientMin = -10, gradientMax = 0, thicknessMin = 1, thicknessMax = 5
+    nodeFontSize = 12, edgeFontSize = 10, gradientMin = -10, gradientMax = 0,
+    widthDataMin = -10, widthDataMax = 0, // NEW: Data limits for width
+    thicknessMin = 1, thicknessMax = 5    // Fixed pixel limits
 ) => {
 
     const formatLabel = (label) => {
@@ -92,7 +94,7 @@ export const generateDynamicStyles = (
                 'border-width': 1,
                 'border-color': '#555',
                 'shape': 'round-rectangle',
-                'font-size': fontSize, // Dynamic Font Size
+                'font-size': nodeFontSize, // Independent Node Font Size
                 'width': '60px',
                 'height': '40px',
                 'padding': 4,
@@ -110,7 +112,7 @@ export const generateDynamicStyles = (
                 'border-width': 2,
                 'border-color': '#333',
                 'font-weight': 'bold',
-                'font-size': fontSize + 2, // Slightly larger
+                'font-size': nodeFontSize + 2,
                 'padding': 10,
                 'z-index': 0,
                 'z-compound-depth': 'bottom'
@@ -126,7 +128,7 @@ export const generateDynamicStyles = (
                 'target-arrow-shape': 'triangle',
                 'arrow-scale': 1,
                 'label': `data(${viewMode})`,
-                'font-size': Math.max(8, fontSize - 2), // Scale edge label too
+                'font-size': edgeFontSize, // Independent Edge Font Size
                 'text-background-color': '#fff',
                 'text-background-opacity': 0.8,
                 'text-background-padding': 2,
@@ -137,18 +139,14 @@ export const generateDynamicStyles = (
                 'z-compound-depth': 'top'
             }
         },
+        // ... (standard classes like .highlighted, .selected remain same)
         {
             selector: '.isolated',
-            style: {
-                'display': 'element'
-            }
+            style: { 'display': 'element' }
         },
         {
             selector: '.highlighted',
-            style: {
-                'border-color': '#ff00ff',
-                'border-width': 4
-            }
+            style: { 'border-color': '#ff00ff', 'border-width': 4 }
         },
         {
             selector: '.selected',
@@ -162,23 +160,22 @@ export const generateDynamicStyles = (
         },
         {
             selector: '.hidden',
-            style: {
-                'display': 'none'
-            }
+            style: { 'display': 'none' }
         }
     ];
 
     if (viewMode === 'wns' || viewMode === 'tns') {
         styles.push(
             {
+                // Negative values (violations)
                 selector: `edge[${viewMode} < 0]`,
                 style: {
-                    // Map WNS/TNS (negative values) to Red Gradient
-                    // input: gradientMin (e.g. -10) to gradientMax (e.g. 0)
-                    // output: #ff0000 (bright red) to #ffcccc (faint red)
+                    // Map input range (gradientMin ... gradientMax) to output range (Red ... LightRed)
                     'line-color': `mapData(${viewMode}, ${gradientMin}, ${gradientMax}, #ff0000, #ffcccc)`,
                     'target-arrow-color': `mapData(${viewMode}, ${gradientMin}, ${gradientMax}, #ff0000, #ffcccc)`,
-                    'width': `mapData(${viewMode}, ${gradientMin}, ${gradientMax}, ${thicknessMax}, ${thicknessMin})`, // Thicker for worse slack
+                    // Thicker for worse values (closer to widthDataMin aka most negative)
+                    // Note: If widthDataMin != gradientMin, this allows independent control
+                    'width': `mapData(${viewMode}, ${widthDataMin}, ${widthDataMax}, ${thicknessMax}, ${thicknessMin})`,
                     'color': '#d32f2f',
                     'curve-style': curveStyle,
                     'source-endpoint': endpointStyle,
@@ -186,11 +183,12 @@ export const generateDynamicStyles = (
                 }
             },
             {
+                // Positive values (Good)
                 selector: `edge[${viewMode} >= 0]`,
                 style: {
                     'line-color': '#2ecc71',
                     'target-arrow-color': '#2ecc71',
-                    'width': thicknessMin, // Base thickness
+                    'width': thicknessMin, // Always thin
                     'color': '#2ecc71',
                     'curve-style': curveStyle,
                     'source-endpoint': endpointStyle,
@@ -203,10 +201,13 @@ export const generateDynamicStyles = (
             {
                 selector: 'edge',
                 style: {
-                    // map connections 1 to maxConnections
-                    'line-color': `mapData(connections, 1, ${maxConnections}, #ffcccc, #ff0000)`,
-                    'target-arrow-color': `mapData(connections, 1, ${maxConnections}, #ffcccc, #ff0000)`,
-                    'width': `mapData(connections, 1, ${maxConnections}, ${thicknessMin}, ${thicknessMax})`,
+                    // gradientMin here is Worst/High Conn (red), gradientMax is Low (light)
+                    // We assume widthDataMin/Max follows same logic for user consistency
+
+                    'line-color': `mapData(connections, ${gradientMax}, ${gradientMin}, #ffcccc, #ff0000)`,
+                    'target-arrow-color': `mapData(connections, ${gradientMax}, ${gradientMin}, #ffcccc, #ff0000)`,
+                    'width': `mapData(connections, ${widthDataMax}, ${widthDataMin}, ${thicknessMin}, ${thicknessMax})`,
+
                     'color': '#333',
                     'curve-style': curveStyle,
                     'source-endpoint': endpointStyle,
