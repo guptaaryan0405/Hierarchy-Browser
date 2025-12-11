@@ -29,6 +29,6 @@ export const buildHierarchyTree = (elements) => {
         }
     });
 
-    console.log("Hierarchy Tree:", tree);
+    // console.log("Hierarchy Tree:", tree);
     return tree;
 };

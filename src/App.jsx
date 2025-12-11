@@ -218,7 +218,7 @@ function App() {
         {/* TOP HEADER / TOOLBAR */}
         <header className="app-header">
           <div className="title-section">
-            <h1>Hierarchy Analyser</h1>
+            <h1>Hierarchy Browser</h1>
           </div>
 
           <div className="toolbar-controls">
@@ -347,7 +347,7 @@ function App() {
                   />
                 </div>
               </div>
-              {/* <p className="help-text">Auto-set to Data Range. Worst Value = Max Red.</p> */}
+
 
               {/* Thickness Mapping */}
               <label style={{ marginTop: '5px' }}>Width Mapping (Thickness)</label>

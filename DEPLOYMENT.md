@@ -32,8 +32,27 @@ If you prefer to host files on an existing Nginx/Apache server or internal S3-co
     This will generate a `dist/` folder containing `index.html`, `assets/`, etc.
 2.  **Deploy:**
     Copy the contents of the `dist/` folder to your web server's root directory (e.g., `/var/www/html/`).
-3.  **Config Note:**
-    Ensure your web server is configured to serve `index.html` for any unknown routes (SPA fallback), although this app is primarily single-route.
+
+### Option C: Artifactory Webhosting (Company Standard)
+This is likely the easiest method if your company supports it.
+
+1.  **Generate the Website:**
+    Run the following command in your terminal:
+    ```bash
+    npm run build
+    ```
+    This creates a folder named `dist` in your project. This folder contains the entire ready-to-use website.
+
+2.  **Upload to Artifactory:**
+    *   Log in to your company's Artifactory Web UI.
+    *   Navigate to the target **Federated Repository** (e.g., `generic-local` or `web-hosting`).
+    *   Create a folder for your project (e.g., `hierarchy-browser/`).
+    *   **Upload the contents** of the `dist` folder into this Artifactory folder.
+    *   Ensure `index.html` is at the root of your folder.
+
+3.  **Access:**
+    Your IT team will provide the URL, usually looking like:
+    `https://artifactory.your-company.com/artifactory/webapp/hierarchy-browser/index.html`
 
 ---
 
