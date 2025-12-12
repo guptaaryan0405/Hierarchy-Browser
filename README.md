@@ -1,16 +1,68 @@
-# React + Vite
+# VLSI Hierarchy Browser
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+The **Hierarchy Browser** is a specialized visualization tool tailored for VLSI (Very Large Scale Integration) engineers. It transforms flat connection data (CSV) into an interactive, hierarchical node graph, allowing engineers to visualize signal flow, timing violations (WNS/TNS), and module connectivity across complex chip designs.
 
-Currently, two official plugins are available:
+![Dashboard Preview](public/screenshots/dashboard.png)
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## 🚀 Key Features
 
-## React Compiler
+*   **Hierarchical Visualization**: Automatically nests sub-modules (e.g., `u_core/u_cache`) into parent containers to mirror the actual RTL structure.
+*   **Timing Heatmaps**: Instantly spot critical paths.
+    *   **Red Intensity**: Indicates Worse Negative Slack (WNS).
+    *   **Edge Thickness**: Represents signal count or connection strength.
+*   **Interactive Filtering**:
+    *   Filter by **Slack** (WNS/TNS) to isolate timing violations.
+    *   Filter by **Connectivity** to ignore minor control signals.
+*   **Deep Inspection**:
+    *   **Isolate Mode**: Focus on one module and its immediate neighbors.
+    *   **Search**: Regex-supported search to jump to specific instances.
+*   **Zero-Install Sharing**: Deployable as a static web app or a standout double-click application.
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## 📥 Data Format (Input)
+The tool accepts a **CSV file** with the following required columns. Each row represents a connection (edge) between two hierarchical pins or modules.
 
-## Expanding the ESLint configuration
+| Column Name | Description | Example |
+| :--- | :--- | :--- |
+| `hier` | Source module path (Hierarchical) | `u_top/u_core/u_alu` |
+| `connnecting_hier` | Target (Destination) module path | `u_top/u_mem/u_cache_ctrl` |
+| `connections` | Number of signals/bits in this link | `32` |
+| `direction` | Signal direction | `to` or `from` |
+| `wns` | Worst Negative Slack (Timing) | `-0.45` |
+| `tns` | Total Negative Slack | `-12.5` |
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+*(Note: The `desc` column is optional but helpful for tooltips.)*
+
+## 🛠️ Usage
+
+### Quick Start (Pre-built)
+If you have received the `dist` folder:
+1.  **Mac**: Double-click `Run_App.command`
+2.  **Windows**: Double-click `Run_App.bat`
+3.  **Linux**: Run `./start_server.sh`
+4.  The app will open at `http://localhost:8000` (or similar).
+
+### Development
+1.  Install Node.js (v18+).
+2.  Clone the repo:
+    ```bash
+    git clone https://github.com/guptaaryan0405/Hierarchy-Browser.git
+    cd Hierarchy-Browser
+    ```
+3.  Install dependencies:
+    ```bash
+    npm install
+    ```
+4.  Run locally:
+    ```bash
+    npm run dev
+    ```
+
+## 🏗️ Deployment
+To build for production (creates the `dist` folder):
+```bash
+npm run build
+```
+See [DEPLOYMENT.md](./DEPLOYMENT.md) for full server hosting instructions.
+
+## 🤝 Contributing
+See [DEVELOPMENT.md](./DEVELOPMENT.md) for internal workflow and architecture details.
