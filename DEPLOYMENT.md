@@ -47,10 +47,17 @@ This is likely the easiest method if your company supports it.
     *   Log in to your company's Artifactory Web UI.
     *   Navigate to the target **Federated Repository** (e.g., `generic-local` or `web-hosting`).
     *   Create a folder for your project (e.g., `hierarchy-browser/`).
-    *   **Upload the contents** of the `dist` folder into this Artifactory folder.
+
+2.  **Configure Permissions (Crucial):**
+    *   In Artifactory, look for the **Permissions** tab or "User Management".
+    *   Ensure your new repository has a permission target giving **Read Access** to the **`Webhost Viewer`** Service Account.
+    *   *Without this, the website will not load for visitors.*
+
+3.  **Upload to Artifactory:**
+    *   **Upload the contents** of the `dist` folder into your project folder.
     *   Ensure `index.html` is at the root of your folder.
 
-3.  **Access:**
+4.  **Access:**
     Your IT team will provide the URL, usually looking like:
     `https://artifactory.your-company.com/artifactory/webapp/hierarchy-browser/index.html`
 
